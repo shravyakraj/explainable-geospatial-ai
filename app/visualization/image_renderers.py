@@ -4,6 +4,7 @@ from typing import Optional, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
+import scipy.ndimage
 
 
 def array_to_pil_image(arr: np.ndarray) -> Image.Image:
@@ -11,6 +12,45 @@ def array_to_pil_image(arr: np.ndarray) -> Image.Image:
     arr_clipped = np.clip(arr, 0.0, 1.0)
     arr_uint8 = (arr_clipped * 255.0).astype(np.uint8)
     return Image.fromarray(arr_uint8)
+
+
+def create_highlighted_change_image(
+    rgb_image: np.ndarray,
+    change_salience: np.ndarray,
+    threshold: float = 0.35,
+) -> Image.Image:
+    """Create satellite image with a heat/emphasis map overlay and contour around strongest change evidence."""
+    rgb = np.clip(rgb_image, 0.0, 1.0).copy()
+    sal = np.clip(change_salience, 0.0, 1.0)
+
+    mask = sal >= threshold
+    if np.any(mask):
+        # Normalized relative intensity above threshold
+        weights = np.clip((sal - threshold) / (1.0 - threshold + 1e-6), 0.0, 1.0)
+
+        # Heat emphasis transition:
+        # Soft warm blush at boundary -> rich coral/crimson at peak attribution
+        c_low = np.array([0.98, 0.58, 0.56], dtype=np.float32)
+        c_high = np.array([0.91, 0.16, 0.24], dtype=np.float32)
+        tint_color = (1.0 - weights[..., None]) * c_low + weights[..., None] * c_high
+
+        # Continuous alpha: smoothly transitions from 0.35 above threshold to 0.70 at peak
+        alpha = (0.35 + 0.35 * (weights ** 0.65))[..., None]
+
+        # Blend on top of original imagery preserving underlying satellite texture
+        rgb = np.where(mask[..., None], (1.0 - alpha) * rgb + alpha * tint_color, rgb)
+
+        # Soft contour outlining the cohesive peak evidence region
+        contour_sal_thresh = max(0.50, threshold + 0.10) if np.any(sal >= 0.50) else threshold
+        peak_mask = sal >= contour_sal_thresh
+        if np.any(peak_mask):
+            closed = scipy.ndimage.binary_closing(peak_mask, iterations=2)
+            dilated = scipy.ndimage.binary_dilation(closed, iterations=2)
+            contour = dilated & (~closed)
+            rgb[contour] = np.array([0.88, 0.12, 0.22], dtype=np.float32)
+
+    rgb_clipped = np.clip(rgb, 0.0, 1.0)
+    return Image.fromarray((rgb_clipped * 255.0).astype(np.uint8))
 
 
 def create_comparison_grid_figure(

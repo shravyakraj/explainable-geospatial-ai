@@ -54,39 +54,23 @@ def generate_scientific_explanation_text(
     threshold: float,
     delta_ndvi: np.ndarray,
 ) -> str:
-    """Generate concise, factual explanation based ONLY on model output and measured spectral characteristics.
-
-    Strictly complies with scientific rules: No speculative causal mechanisms (logging, mining, roads, agriculture).
-    """
+    """Generate plain-English evidence narrative based on satellite observations."""
     is_deforest = probability >= threshold
-    mean_dndvi = float(np.mean(delta_ndvi))
-    min_dndvi = float(np.min(delta_ndvi))
     pct_loss_area = float(np.mean(delta_ndvi < -0.15) * 100.0)
 
-    pred_label = "Deforestation" if is_deforest else "Intact Forest"
-    explanation = [
-        f"The model classified this patch as {pred_label} with an output probability of {probability:.4f} "
-        f"(decision threshold: {threshold:.2f})."
-    ]
-
     if is_deforest:
-        explanation.append(
-            f"The later acquisition (T2) shows a localized reduction in vegetation-index response relative to the "
-            f"baseline acquisition (T1), with approximately {pct_loss_area:.1f}% of the patch exhibiting a negative "
-            f"vegetation index shift (ΔNDVI < -0.15, peak shift: {min_dndvi:.2f})."
-        )
-        explanation.append(
-            "Bi-temporal Grad-CAM reveals a model-highlighted region of increased relative salience in T2. "
-            "Note that Grad-CAM reflects qualitative neural network attribution rather than physical segmentation boundaries, "
-            "and relative salience regions should be evaluated alongside empirical vegetation-index response maps rather than assumed spatially identical or causally equivalent."
+        explanation = (
+            f"The two satellite images show a noticeable change in this area between 2020 and 2021. "
+            f"The highlighted part of the image is where the strongest signs of forest-cover change appear. "
+            f"In the later image, about {pct_loss_area:.1f}% of the patch shows a noticeable drop in the vegetation signal."
         )
     else:
-        explanation.append(
-            f"The patch demonstrates stable vegetation-index response between acquisitions (mean ΔNDVI: {mean_dndvi:+.3f}). "
-            "The model output remains below the classification threshold, indicating consistent intact forest characteristics."
+        explanation = (
+            "The two satellite images do not show strong enough signs of forest clearing to classify this area as a deforestation anomaly. "
+            "The areas that mattered most for the prediction look broadly similar between the two dates."
         )
 
-    return " ".join(explanation)
+    return explanation
 
 
 class ProductionDeforestationClassifier:
