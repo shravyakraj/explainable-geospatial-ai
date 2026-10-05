@@ -1,0 +1,85 @@
+# Production Model Configuration
+# Author: Shravya
+# Phase: 3 - Explainable AI Inference & Dashboard
+
+model_metadata:
+  model_id: "FAM-A2"
+  model_name: "Pretrained_MobileNetV3_Frozen"
+  model_version: "2.4.0-phase2d"
+  architecture_family: "Pretrained Siamese Convolutional Neural Network"
+  backbone: "MobileNetV3-Small (ImageNet pretrained, frozen)"
+  fusion_strategy: "Elementwise Absolute Feature Difference (|f(T1) - f(T2)|)"
+  checkpoint_path: "models/champion_phase2d_mobilenetv3.keras"
+  original_training_checkpoint: "experiments/phase2d/checkpoint_fam-a2.keras"
+  parameter_count:
+    total: 978429
+    trainable: 38157
+    non_trainable: 940272
+
+input_contract:
+  spatial_dimensions: [256, 256]
+  spatial_resolution_m: 10.0
+  patch_dimension_km: [2.56, 2.56]
+  patch_surface_area_ha: 655.36
+  prodes_mmu_threshold_ha: 6.25
+  num_bands: 4
+  bands:
+    - name: "B02"
+      description: "Blue (490 nm)"
+      index: 0
+    - name: "B03"
+      description: "Green (560 nm)"
+      index: 1
+    - name: "B04"
+      description: "Red (665 nm)"
+      index: 2
+    - name: "B08"
+      description: "Near-Infrared / NIR (842 nm)"
+      index: 3
+  temporal_inputs:
+    input_t1:
+      role: "Baseline / Earlier Sentinel-2 Acquisition"
+      default_date: "2020-08-08"
+      granule_id: "S2A_MSIL2A_20200808T142741_R053_T20LMR_20200815T111232"
+    input_t2:
+      role: "Monitoring / Later Sentinel-2 Acquisition"
+      default_date: "2021-08-08"
+      granule_id: "S2B_MSIL2A_20210808T142729_R053_T20LMR_20210809T022211"
+  normalization:
+    method: "Fixed physical reflectance divisor"
+    scale_factor: 10000.0
+    value_range: [0.0, 1.0]
+    dtype: "float32"
+
+decision_contract:
+  target_variable: "binary_deforestation"
+  classes:
+    0: "Intact Forest"
+    1: "Deforestation"
+  decision_threshold: 0.2700
+  default_threshold: 0.5000
+  decision_metric:
+    name: "decision_margin"
+    description: "Derived normalized distance from the classification threshold (|p - tau| / norm). Not a calibrated probability of correctness."
+  prediction_semantics:
+    positive_class: "Deforestation (PRODES >= 1.0 ha loss event detected)"
+    negative_class: "Intact Forest (No significant canopy loss detected)"
+
+explainability_contract:
+  methodology: "Bi-Temporal Gradient-weighted Class Activation Mapping (Grad-CAM)"
+  target_layer: "target_relu (final 8x8x576 feature tensor of shared backbone)"
+  temporal_difference_method: "Pre-normalization activation difference: ReLU(CAM_T2_raw - CAM_T1_raw), normalized to [0, 1]"
+  interpretation_note: "Grad-CAM is a qualitative spatial attribution tool indicating relative feature salience, not an absolute decision weight or legal segmentation boundary."
+
+performance_metrics:
+  held_out_test_set_size: 60
+  test_accuracy: 0.9333
+  test_correct_count: 56
+  test_balanced_accuracy: 0.9412
+  test_f1_score: 0.9286
+  test_recall: 1.0000
+  test_specificity: 0.8824
+  test_precision: 0.8667
+  test_roc_auc: 0.9666
+  test_pr_auc: 0.9354
+  wilson_ci_95_accuracy: [0.8407, 0.9738]

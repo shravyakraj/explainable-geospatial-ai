@@ -1,0 +1,92 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Datasets and Large Geospatial Files
+data/raw/*
+!data/raw/.gitkeep
+data/labels/*
+!data/labels/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+*.tif
+*.tiff
+*.jp2
+*.tar.gz
+*.zip
+*.geojson
+*.gpkg
+*.parquet
+
+# Model weights, checkpoints, and serialized graphs
+models/*
+!models/.gitkeep
+*.h5
+*.hdf5
+*.keras
+*.ckpt
+*.pt
+*.pth
+*.onnx
+
+# Experiment outputs, run logs, and temporary caches
+experiments/*
+!experiments/.gitkeep
+reports/*
+!reports/.gitkeep
+logs/
+*.log
+
+# Secrets, credentials, and environment overrides
+.env*
+secrets.json
+credentials.json
+token.json
