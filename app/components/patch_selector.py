@@ -14,12 +14,12 @@ def render_patch_selector() -> Tuple[Dict[str, Any], bool]:
     """Render welcoming patch selection controls and return selected record and reveal_ground_truth flag."""
     st.sidebar.markdown(
         """
-        <div style="padding-bottom: 0.4rem; margin-bottom: 0.6rem;">
-            <div style="font-size: 0.82rem; font-weight: 800; color: #2B2D31; text-transform: uppercase; letter-spacing: 0.05em;">
-                Choose an area
+        <div style="padding-bottom: 0.4rem; margin-bottom: 0.6rem; border-bottom: 1px solid #1F2937;">
+            <div style="font-size: 0.72rem; font-weight: 700; color: #10B981; text-transform: uppercase; letter-spacing: 0.08em;">
+                Target Area Selection
             </div>
-            <div style="font-size: 0.82rem; color: #555960; margin-top: 0.15rem;">
-                Pick a satellite patch to analyze
+            <div style="font-size: 0.80rem; color: #94A3B8; margin-top: 0.15rem;">
+                Select observation patch for analysis
             </div>
         </div>
         """,
@@ -57,23 +57,23 @@ def render_patch_selector() -> Tuple[Dict[str, Any], bool]:
         selected_id = st.sidebar.selectbox("Patch ID:", patch_ids)
         selected_record = next(p for p in split_patches if p["patch_id"] == selected_id)
 
-    st.sidebar.markdown("<hr style='border: none; border-top: 1px solid #EBE3F9; margin: 1.1rem 0 0.8rem 0;'>", unsafe_allow_html=True)
+    st.sidebar.markdown("<hr style='border: none; border-top: 1px solid #1F2937; margin: 1.0rem 0 0.8rem 0;'>", unsafe_allow_html=True)
     st.sidebar.markdown(
         """
-        <div style="font-size: 0.78rem; font-weight: 800; color: #2B2D31; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem;">
-            Ground Truth Check
+        <div style="font-size: 0.72rem; font-weight: 700; color: #10B981; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.35rem;">
+            Cartographic Verification
         </div>
         """,
         unsafe_allow_html=True,
     )
     reveal_gt = st.sidebar.checkbox("Show PRODES Official Record", value=False)
 
-    # Friendly Geospatial Metadata
-    st.sidebar.markdown("<hr style='border: none; border-top: 1px solid #EBE3F9; margin: 1.1rem 0 0.8rem 0;'>", unsafe_allow_html=True)
+    # Geospatial Metadata Telemetry Card
+    st.sidebar.markdown("<hr style='border: none; border-top: 1px solid #1F2937; margin: 1.0rem 0 0.8rem 0;'>", unsafe_allow_html=True)
     st.sidebar.markdown(
         """
-        <div style="font-size: 0.78rem; font-weight: 800; color: #2B2D31; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem;">
-            Area Details
+        <div style="font-size: 0.72rem; font-weight: 700; color: #10B981; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.45rem;">
+            Scene Telemetry & Coordinates
         </div>
         """,
         unsafe_allow_html=True,
@@ -83,14 +83,17 @@ def render_patch_selector() -> Tuple[Dict[str, Any], bool]:
 
     st.sidebar.markdown(
         f"""
-        <div style="background-color: #FAF2F7; border: 1.5px solid #E4D9EB; border-radius: 4px; padding: 0.8rem 0.95rem; font-size: 0.82rem; color: #2B2D31; line-height: 1.65;">
-            <div><strong>Patch ID:</strong> <code>{selected_record['patch_id']}</code></div>
-            <div><strong>Region:</strong> Amazon (MGRS 20LMR)</div>
-            <div><strong>Grid:</strong> Row {selected_record.get('row')}, Col {selected_record.get('col')}</div>
-            <div><strong>Area Size:</strong> {geo_info['area_ha']} hectares (2.56 × 2.56 km)</div>
-            <div><strong>Resolution:</strong> 10 meters per pixel</div>
-            <div><strong>Acquisition 1:</strong> 08 Aug 2020</div>
-            <div><strong>Acquisition 2:</strong> 08 Aug 2021</div>
+        <div style="background-color: #111720; border: 1px solid #1F2937; border-radius: 6px; padding: 0.85rem 1.0rem; font-size: 0.80rem; line-height: 1.7; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1A2433; padding-bottom: 0.35rem; margin-bottom: 0.4rem;">
+                <span style="color: #94A3B8; font-weight: 600;">Patch ID</span>
+                <code style="color: #38BDF8; background: #16202A; border: 1px solid #1F2E3D; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.76rem;">{selected_record['patch_id']}</code>
+            </div>
+            <div style="display: flex; justify-content: space-between;"><span style="color: #94A3B8;">Region</span><span style="color: #F0F6FC; font-weight: 500;">Amazon (20LMR)</span></div>
+            <div style="display: flex; justify-content: space-between;"><span style="color: #94A3B8;">Grid Position</span><span style="color: #F0F6FC; font-variant-numeric: tabular-nums;">R{selected_record.get('row')}, C{selected_record.get('col')}</span></div>
+            <div style="display: flex; justify-content: space-between;"><span style="color: #94A3B8;">Coverage</span><span style="color: #34D399; font-weight: 600;">{geo_info['area_ha']} ha</span></div>
+            <div style="display: flex; justify-content: space-between;"><span style="color: #94A3B8;">Spatial Res</span><span style="color: #F0F6FC;">10m / pixel</span></div>
+            <div style="display: flex; justify-content: space-between;"><span style="color: #94A3B8;">T1 Baseline</span><span style="color: #94A3B8; font-variant-numeric: tabular-nums;">08 Aug 2020</span></div>
+            <div style="display: flex; justify-content: space-between;"><span style="color: #94A3B8;">T2 Monitor</span><span style="color: #94A3B8; font-variant-numeric: tabular-nums;">08 Aug 2021</span></div>
         </div>
         """,
         unsafe_allow_html=True,
